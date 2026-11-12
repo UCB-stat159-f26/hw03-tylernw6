@@ -4,8 +4,8 @@ A Python package in development for retrieving career match data from
 [Tennis Abstract](https://www.tennisabstract.com/) and reproducing the HW2
 scatter plot for different players, without annotations.
 
-**Current stage:** package scaffold and setup guide. Retrieval, plotting, and
-tests are not implemented yet.
+**Current stage:** package scaffold, setup guide, and local women's and men's
+JS fixtures. Retrieval, plotting, and tests are not implemented yet.
 
 ## Assignment requirements
 
@@ -40,7 +40,7 @@ hw03-tylernw6/
 │   └── tenniscareer/
 │       └── __init__.py       # package entry point
 └── tests/
-    └── fixtures/            # local JS examples will go here
+    └── fixtures/            # assignment samples and source notes
 ```
 
 Next we will add modules for retrieval, cleaning, and plotting under
@@ -118,18 +118,19 @@ age on the x-axis, player age minus opponent age on the y-axis, and colors
 for wins and losses. HW3 will generalize this to other players and omit the
 annotations.
 
-You do not need to manually download career files for automated tests. We
-will create small women's and men's fixtures from the mock examples supplied
-in `instructions.md`. Live downloads belong in the public retrieval function,
-not in the automated test suite.
+You do not need to manually download career files for automated tests. Small
+women's and men's fixtures from the mock examples in `instructions.md` are
+stored in [tests/fixtures/](tests/fixtures/README.md). Live downloads belong
+in the public retrieval function, not in the automated test suite.
 
 ## Planned commit sequence
 
 1. Initialize package structure and setup documentation.
-2. Add local women's and men's JS fixtures and parsing tests.
-3. Implement cleaning, including opponent age handling.
-4. Implement player-name handling and career retrieval.
-5. Add the scatter plot and plotting tests.
-6. Finish usage documentation and verify installation from a built package.
+2. Add local women's and men's JS fixtures.
+3. Implement parsing with offline tests.
+4. Implement cleaning, including opponent age handling.
+5. Implement player-name handling and career retrieval.
+6. Add the scatter plot and plotting tests.
+7. Finish usage documentation and verify installation from a built package.
 
 Each commit will contain one completed step and its relevant verification.
