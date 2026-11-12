@@ -4,8 +4,9 @@ A Python package in development for retrieving career match data from
 [Tennis Abstract](https://www.tennisabstract.com/) and reproducing the HW2
 scatter plot for different players, without annotations.
 
-**Current stage:** package scaffold, setup guide, and local women's and men's
-JS fixtures. Retrieval, plotting, and tests are not implemented yet.
+**Current stage:** package scaffold, setup guide, and a JavaScript match parser
+tested with local women's and men's fixtures. Retrieval, cleaning, and plotting
+are not implemented yet.
 
 ## Assignment requirements
 
@@ -38,8 +39,11 @@ hw03-tylernw6/
 ├── pyproject.toml            # metadata, dependencies, build settings
 ├── src/
 │   └── tenniscareer/
-│       └── __init__.py       # package entry point
+│       ├── __init__.py       # package entry point
+│       └── _parsing.py       # private JS match-array parser
 └── tests/
+    ├── conftest.py          # blocks network connections during tests
+    ├── test_parsing.py      # fixture and malformed-input tests
     └── fixtures/            # assignment samples and source notes
 ```
 
@@ -122,6 +126,21 @@ You do not need to manually download career files for automated tests. Small
 women's and men's fixtures from the mock examples in `instructions.md` are
 stored in [tests/fixtures/](tests/fixtures/README.md). Live downloads belong
 in the public retrieval function, not in the automated test suite.
+
+## Running the offline tests
+
+With `.venv` active, run:
+
+```bash
+python -m pytest -q
+```
+
+Pytest reads the package source from `src/`. All tests run with network
+connections blocked. Parser tests cover both assignment fixtures, differing
+row lengths, surrounding JavaScript statements, quoted text, and clear errors
+for missing arrays, malformed JSON, and invalid row shapes. The parser reads
+JSON data only; it never executes JavaScript. Cleaning will validate individual
+field values in the next step.
 
 ## Planned commit sequence
 
