@@ -4,9 +4,8 @@ A Python package in development for retrieving career match data from
 [Tennis Abstract](https://www.tennisabstract.com/) and reproducing the HW2
 scatter plot for different players, without annotations.
 
-**Current stage:** package scaffold, setup guide, and a JavaScript match parser
-tested with local women's and men's fixtures. Retrieval, cleaning, and plotting
-are not implemented yet.
+**Current stage:** package scaffold, setup guide, JavaScript parsing, and match
+cleaning with offline tests. Live retrieval and plotting are not implemented yet.
 
 ## Assignment requirements
 
@@ -40,14 +39,16 @@ hw03-tylernw6/
 ├── src/
 │   └── tenniscareer/
 │       ├── __init__.py       # package entry point
+│       ├── _cleaning.py      # match fields and age calculations
 │       └── _parsing.py       # private JS match-array parser
 └── tests/
     ├── conftest.py          # blocks network connections during tests
+    ├── test_cleaning.py     # schema, ages, walkovers, and invalid fields
     ├── test_parsing.py      # fixture and malformed-input tests
     └── fixtures/            # assignment samples and source notes
 ```
 
-Next we will add modules for retrieval, cleaning, and plotting under
+Next we will add modules for retrieval and plotting under
 `src/tenniscareer/`, with corresponding tests under `tests/`.
 
 ## Setup and downloads, one step at a time
@@ -139,8 +140,40 @@ Pytest reads the package source from `src/`. All tests run with network
 connections blocked. Parser tests cover both assignment fixtures, differing
 row lengths, surrounding JavaScript statements, quoted text, and clear errors
 for missing arrays, malformed JSON, and invalid row shapes. The parser reads
-JSON data only; it never executes JavaScript. Cleaning will validate individual
-field values in the next step.
+JSON data only; it never executes JavaScript. Cleaning tests cover age
+calculations, missing opponent ages, invalid dates and results, walkovers,
+metadata, and preservation of the original raw rows.
+
+## Clean match data
+
+The private cleaner takes parsed rows, the player's name, and the player's
+birth date in `YYYY-MM-DD` format. Live retrieval will supply these inputs.
+It returns the following columns:
+
+| Column | Meaning |
+| --- | --- |
+| `match_date` | Match date as a pandas datetime |
+| `tournament`, `surface`, `score`, `opponent` | Source match details |
+| `result` | `W` or `L` from the player's perspective |
+| `player_age` | Player's age at the match, in years |
+| `opponent_age` | Opponent's age at the match, in years |
+| `age_difference` | Player age minus opponent age; positive means older |
+
+For dates of birth, ages use elapsed days divided by 365.25. Men's supplied
+decimal opponent ages are preserved. Missing opponent ages remain missing,
+and the match stays in the table. Invalid nonempty ages or dates raise clear
+errors. Walkovers (`W/O` or `walkover` in the score) are excluded to match
+the earlier chart; retirements remain. Player name and birth date are stored
+in the data frame's `attrs` metadata. Raw rows are never modified.
+
+### Full local data check
+
+The small assignment fixtures are test examples, not the full career dataset.
+On November 12, 2026, parsing and cleaning were also checked against the
+existing local `SerenaWilliamsCareer.js`: 1,038 raw records became 1,016
+played matches after excluding 22 walkovers. Dates ranged from October 30,
+1995 to August 29, 2022. This check used the existing downloaded file without
+contacting a live server; automated tests use only the repository's fixtures.
 
 ## Planned commit sequence
 
