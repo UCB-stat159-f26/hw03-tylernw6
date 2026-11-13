@@ -4,8 +4,8 @@ A Python package in development for retrieving career match data from
 [Tennis Abstract](https://www.tennisabstract.com/) and reproducing the HW2
 scatter plot for different players, without annotations.
 
-**Current stage:** package scaffold, setup guide, JavaScript parsing, and match
-cleaning with offline tests. Live retrieval and plotting are not implemented yet.
+**Current stage:** player-name lookup, full available career retrieval,
+JavaScript parsing, and match cleaning with offline tests. Plotting is next.
 
 ## Assignment requirements
 
@@ -40,16 +40,18 @@ hw03-tylernw6/
 │   └── tenniscareer/
 │       ├── __init__.py       # package entry point
 │       ├── _cleaning.py      # match fields and age calculations
-│       └── _parsing.py       # private JS match-array parser
+│       ├── _parsing.py       # private JS match-array parser
+│       └── _retrieval.py     # player lookup and full-career downloads
 └── tests/
     ├── conftest.py          # blocks network connections during tests
     ├── test_cleaning.py     # schema, ages, walkovers, and invalid fields
+    ├── test_retrieval.py    # mocked search, downloads, and public function
     ├── test_parsing.py      # fixture and malformed-input tests
     └── fixtures/            # assignment samples and source notes
 ```
 
-Next we will add modules for retrieval and plotting under
-`src/tenniscareer/`, with corresponding tests under `tests/`.
+Next we will add plotting under `src/tenniscareer/`, with corresponding
+tests under `tests/`.
 
 ## Setup and downloads, one step at a time
 
@@ -115,6 +117,51 @@ We will check package installation and offline tests as implementation proceeds.
 Python's built-in `urllib`, `json`, and date tools need no separate download.
 This package workflow does not need Quarto, LaTeX, Jupyter, or Conda.
 
+### HTTPS certificates on this Mac
+
+The live check found that this Mac's Python 3.11 installation does not have
+its default certificate bundle configured. Use the existing macOS bundle
+before making live downloads in each new terminal session:
+
+```bash
+export SSL_CERT_FILE=/etc/ssl/cert.pem
+```
+
+This needs no download and keeps HTTPS certificate verification enabled.
+Other computers with working Python certificate settings do not need this
+Mac-specific step.
+
+## Retrieve a player's career
+
+After the local installation in Step 5, run Python and use the public function:
+
+```python
+from tenniscareer import get_career_matches
+
+serena = get_career_matches("serena williams")
+rafa = get_career_matches("RafaelNadal")
+print(serena.head())
+print(rafa.attrs)
+```
+
+Spaced names and joined CamelCase names are accepted. Search requires a full
+name, rather than guessing from a partial match. An unknown name such as
+`GastonSanchez` raises a descriptive `ValueError`. Failed downloads raise
+`ConnectionError` with the underlying cause preserved. Each request has a
+20-second timeout.
+
+The function resolves the canonical name using Tennis Abstract's player
+search. It reads women's metadata and recent matches from the player's JS
+file, and men's metadata and matches from the classic player page. When the
+source sets `careerjs=1`, it also retrieves `Career.js`. Overlapping matches
+are combined using date, tournament, round, opponent, result, and score;
+recent versions take precedence. Matches are returned in date order.
+
+A separate manual live check on November 12, 2026 returned 1,017 played
+matches for Serena Williams and 1,413 for Rafael Nadal, and confirmed the
+unknown-player error. These are counts from the source as served at that time;
+they can change. Live data may differ from the earlier local Serena snapshot.
+
 ## Data and the earlier homework
 
 The existing HW2 instructions, downloaded `SerenaWilliamsCareer.js`, and
@@ -143,6 +190,9 @@ for missing arrays, malformed JSON, and invalid row shapes. The parser reads
 JSON data only; it never executes JavaScript. Cleaning tests cover age
 calculations, missing opponent ages, invalid dates and results, walkovers,
 metadata, and preservation of the original raw rows.
+Retrieval tests replace server responses with local data and cover name
+variants, invalid names, recent/archive merging, malformed search responses,
+birth-date metadata, and failed downloads. No automated test contacts the site.
 
 ## Clean match data
 

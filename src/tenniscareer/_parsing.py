@@ -6,13 +6,25 @@ import re
 
 def _parse_career_js(javascript: str) -> list[list]:
     """Extract nonempty match rows, preserving raw fields for cleaning."""
+    return _parse_match_array(javascript, "morematchmx")
+
+
+def _array_content(javascript: str, variable: str) -> str:
+    """Locate a named array assignment without executing JavaScript."""
     if not isinstance(javascript, str):
         raise TypeError("Career JavaScript must be text.")
-    assignment = re.search(r"\bvar\s+morematchmx\s*=\s*", javascript)
+    assignment = re.search(rf"\bvar\s+{re.escape(variable)}\s*=\s*", javascript)
     if assignment is None:
-        raise ValueError("Career JavaScript is missing the morematchmx array.")
-    rows = _decode_match_array(javascript[assignment.end():])
-    _validate_match_rows(rows)
+        raise ValueError(f"Career JavaScript is missing the {variable} array.")
+    return javascript[assignment.end():]
+
+
+def _parse_match_array(javascript: str, variable: str,
+                       allow_empty: bool = False) -> list[list]:
+    """Read current or archived matches, allowing an empty recent array."""
+    rows = _decode_match_array(_array_content(javascript, variable))
+    if rows != [] or not allow_empty:
+        _validate_match_rows(rows)
     return rows
 
 
