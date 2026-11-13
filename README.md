@@ -4,8 +4,8 @@ A Python package in development for retrieving career match data from
 [Tennis Abstract](https://www.tennisabstract.com/) and reproducing the HW2
 scatter plot for different players, without annotations.
 
-**Current stage:** player-name lookup, full available career retrieval,
-JavaScript parsing, and match cleaning with offline tests. Plotting is next.
+**Current stage:** both public functions are implemented, with offline tests
+for retrieval, parsing, cleaning, and plotting. Distribution checks are next.
 
 ## Assignment requirements
 
@@ -41,17 +41,18 @@ hw03-tylernw6/
 │       ├── __init__.py       # package entry point
 │       ├── _cleaning.py      # match fields and age calculations
 │       ├── _parsing.py       # private JS match-array parser
+│       ├── _plotting.py      # scatter plot and input validation
 │       └── _retrieval.py     # player lookup and full-career downloads
 └── tests/
     ├── conftest.py          # blocks network connections during tests
     ├── test_cleaning.py     # schema, ages, walkovers, and invalid fields
     ├── test_retrieval.py    # mocked search, downloads, and public function
     ├── test_parsing.py      # fixture and malformed-input tests
+    ├── test_plotting.py     # coordinates, labels, and PNG/PDF exports
     └── fixtures/            # assignment samples and source notes
 ```
 
-Next we will add plotting under `src/tenniscareer/`, with corresponding
-tests under `tests/`.
+The public functions are `get_career_matches()` and `plot_career_matches()`.
 
 ## Setup and downloads, one step at a time
 
@@ -162,6 +163,33 @@ matches for Serena Williams and 1,413 for Rafael Nadal, and confirmed the
 unknown-player error. These are counts from the source as served at that time;
 they can change. Live data may differ from the earlier local Serena snapshot.
 
+## Plot and save a career
+
+```python
+import matplotlib.pyplot as plt
+from tenniscareer import get_career_matches, plot_career_matches
+
+serena = get_career_matches("Serena Williams")
+ax = plot_career_matches(serena)
+ax.figure.savefig("serena_career.png", dpi=150)
+ax.figure.savefig("serena_career.pdf")
+plt.show()
+```
+
+The plot places player age on the top x-axis and player age minus opponent
+age on the y-axis. Wins are cyan and losses are purple. The zero reference
+line means the players were the same age. A positive value means the player
+was older than the opponent. Bounds adapt to the data. The title uses the
+player name from the data frame's metadata, falling back to `Player` when it
+is unavailable. Match annotations are omitted as required by HW3.
+
+The function returns a Matplotlib `Axes` so you can save or customize the
+figure. To draw in an existing subplot, use `plot_career_matches(serena, ax=ax)`.
+It does not modify the input table or call `plt.show()` automatically.
+Matches with missing coordinates are omitted from the plot; if no matches
+remain, it raises a clear `ValueError`. Invalid results, nonnumeric or infinite
+coordinates, and player ages outside 0–100 years also raise clear errors.
+
 ## Data and the earlier homework
 
 The existing HW2 instructions, downloaded `SerenaWilliamsCareer.js`, and
@@ -193,6 +221,10 @@ metadata, and preservation of the original raw rows.
 Retrieval tests replace server responses with local data and cover name
 variants, invalid names, recent/archive merging, malformed search responses,
 birth-date metadata, and failed downloads. No automated test contacts the site.
+Plotting tests use a noninteractive backend and check actual scatter coordinates,
+win/loss colors, labels, missing-age handling, input preservation, adaptive
+bounds, and PNG/PDF exports. A separate visual check used all 1,016 played
+matches from the existing local Serena snapshot.
 
 ## Clean match data
 

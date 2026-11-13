@@ -2,7 +2,10 @@
 
 import socket
 
+import matplotlib
 import pytest
+
+matplotlib.use("Agg")
 
 
 def _block_network(*args, **kwargs):
