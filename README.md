@@ -1,11 +1,11 @@
 # Tennis Career — HW3
 
-A Python package in development for retrieving career match data from
+A Python package for retrieving career match data from
 [Tennis Abstract](https://www.tennisabstract.com/) and reproducing the HW2
 scatter plot for different players, without annotations.
 
-**Current stage:** both public functions are implemented, with offline tests
-for retrieval, parsing, cleaning, and plotting. Distribution checks are next.
+Both public functions are implemented, with offline tests for retrieval,
+parsing, cleaning, and plotting. Example charts are saved in `outputs/`.
 
 ## Assignment requirements
 
@@ -28,7 +28,7 @@ HW3 does not require a Makefile or `environment.yml`.
 
 This uses the Python Packaging User Guide's
 [src layout](https://packaging.python.org/en/latest/tutorials/packaging-projects/).
-The initial files are:
+The repository contains:
 
 ```text
 hw03-tylernw6/
@@ -36,6 +36,8 @@ hw03-tylernw6/
 ├── README.md
 ├── .gitignore
 ├── pyproject.toml            # metadata, dependencies, build settings
+├── MANIFEST.in               # include offline fixtures in the source archive
+├── outputs/                  # example Serena PDF, PNG, and source notes
 ├── src/
 │   └── tenniscareer/
 │       ├── __init__.py       # package entry point
@@ -113,7 +115,15 @@ python -m build
 ```
 
 This produces a wheel and source archive in the ignored `dist/` folder.
-We will check package installation and offline tests as implementation proceeds.
+Pip/build installs build dependencies as needed. For an offline build, first
+install the build tools, then disable build isolation:
+
+```bash
+python -m pip install 'build>=1' 'setuptools>=68' wheel
+python -m build --no-isolation
+```
+
+The build tools were installed into this project's `.venv` during verification.
 
 Python's built-in `urllib`, `json`, and date tools need no separate download.
 This package workflow does not need Quarto, LaTeX, Jupyter, or Conda.
@@ -144,6 +154,15 @@ rafa = get_career_matches("RafaelNadal")
 print(serena.head())
 print(rafa.attrs)
 ```
+
+For the assignment's direct GitHub installation, use:
+
+```bash
+python -m pip install git+https://github.com/UCB-stat159-f26/hw03-tylernw6.git
+```
+
+GitHub installation uses the version pushed to the repository, so local
+commits must be pushed before the grader can install those changes.
 
 Spaced names and joined CamelCase names are accepted. Search requires a full
 name, rather than guessing from a partial match. An unknown name such as
@@ -189,6 +208,9 @@ It does not modify the input table or call `plt.show()` automatically.
 Matches with missing coordinates are omitted from the plot; if no matches
 remain, it raises a clear `ValueError`. Invalid results, nonnumeric or infinite
 coordinates, and player ages outside 0–100 years also raise clear errors.
+
+Saved examples are available in [outputs/](outputs/README.md), including the
+[PDF](outputs/serena_career.pdf) and [PNG](outputs/serena_career.png).
 
 ## Data and the earlier homework
 
@@ -257,7 +279,26 @@ played matches after excluding 22 walkovers. Dates ranged from October 30,
 1995 to August 29, 2022. This check used the existing downloaded file without
 contacting a live server; automated tests use only the repository's fixtures.
 
-## Planned commit sequence
+## Package verification
+
+On November 12, 2026, the following checks passed:
+
+- An editable installation into the project `.venv`.
+- `pip check`, with no broken requirements.
+- Building both the wheel and source archive with `python -m build --no-isolation`.
+- Installing the wheel into a separate directory outside the repository.
+- Running all 106 offline tests from the extracted source archive against
+  that installed wheel, with the repository's `src/` path disabled.
+- Confirming the source archive includes both JS fixtures and the network-blocking
+  test configuration.
+- Checking every package function stays within the assignment's 20-line limit.
+- Rendering and visually reviewing the saved example PDF.
+
+Build files are under `dist/` and ignored by Git. The visible example PDF and
+PNG under `outputs/` are committed. These checks verify local packaging;
+installation from GitHub will use the changes after they are pushed.
+
+## Development steps
 
 1. Initialize package structure and setup documentation.
 2. Add local women's and men's JS fixtures.
@@ -267,4 +308,4 @@ contacting a live server; automated tests use only the repository's fixtures.
 6. Add the scatter plot and plotting tests.
 7. Finish usage documentation and verify installation from a built package.
 
-Each commit will contain one completed step and its relevant verification.
+Each commit contains one completed step and its relevant verification.
