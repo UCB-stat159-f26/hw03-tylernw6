@@ -46,8 +46,7 @@ def _search_query(player_name: str) -> str:
 def _find_player(player_name: str) -> dict:
     """Require one exact normalized match from the site's player search."""
     query = _search_query(player_name)
-    candidates = _search_results(_download_text(
-        f"{_BASE_URL}/cgi-bin/search.cgi?q={quote(query)}"))
+    candidates = _search_results(_download_text(f"{_BASE_URL}/cgi-bin/search.cgi?q={quote(query)}"))
     matches = [p for p in candidates if _name_key(p["name"]) == _name_key(query)]
     if not matches:
         raise ValueError(f"Player {player_name!r} was not found on Tennis Abstract.")

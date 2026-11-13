@@ -16,4 +16,4 @@ The different row lengths must not be treated as a single fixed-width schema.
 
 Parser and cleaning tests read these files locally. The women's sample
 contains only losses; the men's sample includes both wins and losses.
-Additional edge cases will be tested separately as the implementation grows.
+Additional edge cases are covered in the tests without changing these samples.

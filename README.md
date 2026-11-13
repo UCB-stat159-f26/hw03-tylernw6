@@ -7,22 +7,7 @@ scatter plot for different players, without annotations.
 Both public functions are implemented, with offline tests for retrieval,
 parsing, cleaning, and plotting. Example charts are saved in `outputs/`.
 
-## Assignment requirements
-
-The authoritative requirements are in [instructions.md](instructions.md).
-
-- Provide two public functions: retrieve clean career data and plot that data.
-- Accept names such as `serena williams`, `Serena Williams`, and `SerenaWilliams`.
-- Give a meaningful error for an invalid player name.
-- Support both women's opponent birth dates and men's opponent ages.
-- Keep every function to at most 20 code lines, excluding comments and blanks;
-  aim for at most 10 lines for private helpers.
-- Test parsing and cleaning with local JS fixtures; automated tests must never
-  contact live servers.
-- Support installation directly from this GitHub repository.
-- Make small, coherent commits with descriptive messages.
-
-HW3 does not require a Makefile or `environment.yml`.
+Assignment requirements are in [instructions.md](instructions.md).
 
 ## Package structure
 
@@ -58,9 +43,7 @@ The public functions are `get_career_matches()` and `plot_career_matches()`.
 
 ## Setup and downloads, one step at a time
 
-Run these commands in Terminal from this repository's root folder.
-Python 3.11.9, pip, and Git were already available on this Mac when checked.
-You do not need to download another Python installer.
+Use Python 3.11 or newer and Git. Run these commands from the repository root.
 
 ### Step 1: create an isolated environment (no download)
 
@@ -110,37 +93,26 @@ setuptools build dependency automatically if needed.
 ### Step 6: download the build tool when checking distribution files
 
 ```bash
-python -m pip install 'build>=1'
-python -m build
-```
-
-This produces a wheel and source archive in the ignored `dist/` folder.
-Pip/build installs build dependencies as needed. For an offline build, first
-install the build tools, then disable build isolation:
-
-```bash
 python -m pip install 'build>=1' 'setuptools>=68' wheel
 python -m build --no-isolation
 ```
 
-The build tools were installed into this project's `.venv` during verification.
+This produces a wheel and source archive in the ignored `dist/` folder.
+Once the build tools are installed, this build command works offline.
 
 Python's built-in `urllib`, `json`, and date tools need no separate download.
-This package workflow does not need Quarto, LaTeX, Jupyter, or Conda.
 
 ### HTTPS certificates on this Mac
 
-The live check found that this Mac's Python 3.11 installation does not have
-its default certificate bundle configured. Use the existing macOS bundle
-before making live downloads in each new terminal session:
+If Python reports `CERTIFICATE_VERIFY_FAILED` on macOS, use the existing
+macOS certificate bundle before making live downloads:
 
 ```bash
 export SSL_CERT_FILE=/etc/ssl/cert.pem
 ```
 
-This needs no download and keeps HTTPS certificate verification enabled.
-Other computers with working Python certificate settings do not need this
-Mac-specific step.
+This keeps HTTPS verification enabled. Computers with working Python
+certificate settings do not need this Mac-specific step.
 
 ## Retrieve a player's career
 
@@ -161,9 +133,6 @@ For the assignment's direct GitHub installation, use:
 python -m pip install git+https://github.com/UCB-stat159-f26/hw03-tylernw6.git
 ```
 
-GitHub installation uses the version pushed to the repository, so local
-commits must be pushed before the grader can install those changes.
-
 Spaced names and joined CamelCase names are accepted. Search requires a full
 name, rather than guessing from a partial match. An unknown name such as
 `GastonSanchez` raises a descriptive `ValueError`. Failed downloads raise
@@ -177,11 +146,6 @@ source sets `careerjs=1`, it also retrieves `Career.js`. Overlapping matches
 are combined using date, tournament, round, opponent, result, and score;
 recent versions take precedence. Matches are returned in date order.
 
-A separate manual live check on November 12, 2026 returned 1,017 played
-matches for Serena Williams and 1,413 for Rafael Nadal, and confirmed the
-unknown-player error. These are counts from the source as served at that time;
-they can change. Live data may differ from the earlier local Serena snapshot.
-
 ## Plot and save a career
 
 ```python
@@ -190,8 +154,8 @@ from tenniscareer import get_career_matches, plot_career_matches
 
 serena = get_career_matches("Serena Williams")
 ax = plot_career_matches(serena)
-ax.figure.savefig("serena_career.png", dpi=150)
-ax.figure.savefig("serena_career.pdf")
+ax.figure.savefig("outputs/serena_career.png", dpi=150)
+ax.figure.savefig("outputs/serena_career.pdf")
 plt.show()
 ```
 
@@ -212,19 +176,6 @@ coordinates, and player ages outside 0–100 years also raise clear errors.
 Saved examples are available in [outputs/](outputs/README.md), including the
 [PDF](outputs/serena_career.pdf) and [PNG](outputs/serena_career.png).
 
-## Data and the earlier homework
-
-The existing HW2 instructions, downloaded `SerenaWilliamsCareer.js`, and
-`serena_matches.png` were reviewed for context. The earlier chart uses player
-age on the x-axis, player age minus opponent age on the y-axis, and colors
-for wins and losses. HW3 will generalize this to other players and omit the
-annotations.
-
-You do not need to manually download career files for automated tests. Small
-women's and men's fixtures from the mock examples in `instructions.md` are
-stored in [tests/fixtures/](tests/fixtures/README.md). Live downloads belong
-in the public retrieval function, not in the automated test suite.
-
 ## Running the offline tests
 
 With `.venv` active, run:
@@ -233,26 +184,16 @@ With `.venv` active, run:
 python -m pytest -q
 ```
 
-Pytest reads the package source from `src/`. All tests run with network
-connections blocked. Parser tests cover both assignment fixtures, differing
-row lengths, surrounding JavaScript statements, quoted text, and clear errors
-for missing arrays, malformed JSON, and invalid row shapes. The parser reads
-JSON data only; it never executes JavaScript. Cleaning tests cover age
-calculations, missing opponent ages, invalid dates and results, walkovers,
-metadata, and preservation of the original raw rows.
-Retrieval tests replace server responses with local data and cover name
-variants, invalid names, recent/archive merging, malformed search responses,
-birth-date metadata, and failed downloads. No automated test contacts the site.
-Plotting tests use a noninteractive backend and check actual scatter coordinates,
-win/loss colors, labels, missing-age handling, input preservation, adaptive
-bounds, and PNG/PDF exports. A separate visual check used all 1,016 played
-matches from the existing local Serena snapshot.
+Tests read the source from `src/` and block network connections. The
+[women's and men's fixtures](tests/fixtures/README.md) come from the assignment;
+retrieval tests mock server responses. No manual data download is needed.
+Tests cover parsing, age calculations, name variants, errors, archive merging,
+plot coordinates and colors, and PNG/PDF saving. Downloaded JavaScript is
+parsed as data and never executed.
 
 ## Clean match data
 
-The private cleaner takes parsed rows, the player's name, and the player's
-birth date in `YYYY-MM-DD` format. Live retrieval will supply these inputs.
-It returns the following columns:
+`get_career_matches()` returns these columns:
 
 | Column | Meaning |
 | --- | --- |
@@ -270,42 +211,14 @@ errors. Walkovers (`W/O` or `walkover` in the score) are excluded to match
 the earlier chart; retirements remain. Player name and birth date are stored
 in the data frame's `attrs` metadata. Raw rows are never modified.
 
-### Full local data check
-
-The small assignment fixtures are test examples, not the full career dataset.
-On November 12, 2026, parsing and cleaning were also checked against the
-existing local `SerenaWilliamsCareer.js`: 1,038 raw records became 1,016
-played matches after excluding 22 walkovers. Dates ranged from October 30,
-1995 to August 29, 2022. This check used the existing downloaded file without
-contacting a live server; automated tests use only the repository's fixtures.
-
 ## Package verification
 
-On November 12, 2026, the following checks passed:
+Verified on November 12, 2026: 106 offline tests passed, including tests from
+the source archive against an installed wheel outside the repository. Both
+fixtures and the network-blocking configuration are included in the archive.
+Editable installation, dependency checks, and installation directly from
+GitHub also succeeded. The example PDF was rendered and visually reviewed.
 
-- An editable installation into the project `.venv`.
-- `pip check`, with no broken requirements.
-- Building both the wheel and source archive with `python -m build --no-isolation`.
-- Installing the wheel into a separate directory outside the repository.
-- Running all 106 offline tests from the extracted source archive against
-  that installed wheel, with the repository's `src/` path disabled.
-- Confirming the source archive includes both JS fixtures and the network-blocking
-  test configuration.
-- Checking every package function stays within the assignment's 20-line limit.
-- Rendering and visually reviewing the saved example PDF.
-
-Build files are under `dist/` and ignored by Git. The visible example PDF and
-PNG under `outputs/` are committed. These checks verify local packaging;
-installation from GitHub will use the changes after they are pushed.
-
-## Development steps
-
-1. Initialize package structure and setup documentation.
-2. Add local women's and men's JS fixtures.
-3. Implement parsing with offline tests.
-4. Implement cleaning, including opponent age handling.
-5. Implement player-name handling and career retrieval.
-6. Add the scatter plot and plotting tests.
-7. Finish usage documentation and verify installation from a built package.
-
-Each commit contains one completed step and its relevant verification.
+All package functions meet the 20-line limit; private helpers are at most
+10 lines, including definitions and docstrings. Generated build files and
+caches are ignored by Git. HW3 does not require a Makefile or `environment.yml`.
